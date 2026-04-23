@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mzen × Martha Losso — Diagnóstico Digital</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7ff;color:#1a1a2e;min-height:100vh}
+  .container{max-width:480px;margin:0 auto;padding:0 0 80px}
+
+  /* NAV */
+  .nav-wrap{background:white;border-bottom:1px solid #e8e4f8;padding:10px 16px;position:sticky;top:0;z-index:100}
+  .nav-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .nav-scroll::-webkit-scrollbar{display:none}
+  .nav-btn{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid #d4c9f5;font-size:12px;cursor:pointer;background:transparent;color:#6b46c1;white-space:nowrap;font-weight:500;transition:all .2s}
+  .nav-btn.active{background:#5b21b6;color:white;border-color:#5b21b6}
+
+  /* PAGES */
+  .page{display:none;padding:20px 16px 0}
+  .page.active{display:block}
+
+  /* TYPOGRAPHY */
+  .hero-tag{display:inline-block;font-size:11px;padding:4px 12px;border-radius:20px;background:#ede9fe;color:#4c1d95;margin-bottom:14px;font-weight:600;letter-spacing:.03em}
+  h1{font-size:24px;font-weight:700;color:#1a1a2e;line-height:1.3;margin-bottom:10px}
+  h2{font-size:19px;font-weight:700;color:#1a1a2e;margin-bottom:6px}
+  h3{font-size:14px;font-weight:600;color:#1a1a2e;margin-bottom:6px}
+  .sub{font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:18px}
+  .section-label{font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+
+  /* CARDS */
+  .card{background:white;border:1px solid #e8e4f8;border-radius:14px;padding:16px;margin-bottom:12px}
+  .card-accent{border-left:4px solid #7c3aed;border-radius:0 14px 14px 0;padding-left:14px}
+  .card-purple{background:#5b21b6;color:white;border:none}
+  .card-purple h3{color:white}
+  .card-purple p{color:#ddd6fe}
+
+  /* METRICS */
+  .metric-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .metric{background:white;border:1px solid #e8e4f8;border-radius:12px;padding:14px}
+  .metric-val{font-size:26px;font-weight:700;color:#1a1a2e}
+  .metric-lbl{font-size:11px;color:#9ca3af;margin-top:2px}
+  .metric-trend{font-size:11px;margin-top:6px;font-weight:600;padding:2px 8px;border-radius:10px;display:inline-block}
+  .trend-bad{background:#fef3c7;color:#92400e}
+  .trend-ok{background:#d1fae5;color:#065f46}
+
+  /* BADGES */
+  .badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;margin:2px 2px 2px 0;font-weight:500}
+  .b-warn{background:#fef3c7;color:#92400e}
+  .b-ok{background:#d1fae5;color:#065f46}
+  .b-info{background:#ede9fe;color:#4c1d95}
+  .b-red{background:#fee2e2;color:#991b1b}
+
+  /* BARS */
+  .bar-wrap{height:8px;background:#f3f0ff;border-radius:4px;margin:10px 0 5px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width .6s ease}
+  .score-row{display:flex;justify-content:space-between;font-size:11px;color:#9ca3af}
+
+  /* CHANNELS */
+  .ch-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f3f0ff}
+  .ch-row:last-child{border-bottom:none}
+  .ch-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .ch-body{flex:1;min-width:0}
+  .ch-name{font-size:13px;font-weight:600;color:#1a1a2e}
+  .ch-sub{font-size:11px;color:#9ca3af;margin-top:1px}
+  .ch-score{font-size:13px;font-weight:700}
+
+  /* JOURNEY */
+  .step{display:flex;gap:12px;margin-bottom:18px;align-items:flex-start}
+  .step-num{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .step-title{font-size:13px;font-weight:600;color:#1a1a2e;margin-bottom:3px}
+  .step-text{font-size:12px;color:#6b7280;line-height:1.6}
+
+  /* TOGGLE */
+  .toggle-wrap{display:flex;gap:8px;margin-bottom:18px;background:white;padding:4px;border-radius:12px;border:1px solid #e8e4f8}
+  .toggle-btn{flex:1;padding:9px;border-radius:9px;border:none;font-size:13px;cursor:pointer;background:transparent;color:#6b7280;font-weight:500;transition:all .2s}
+  .toggle-btn.on{background:#5b21b6;color:white;font-weight:600}
+
+  /* PROFILE MOCK */
+  .profile-mock{border:2px solid #e8e4f8;border-radius:18px;overflow:hidden;margin-bottom:16px;background:white}
+  .pm-header{padding:14px}
+  .pm-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .pm-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+  .pm-stats{display:flex;gap:16px}
+  .pm-stat{text-align:center}
+  .pm-sv{font-size:14px;font-weight:700;color:#1a1a2e}
+  .pm-sl{font-size:10px;color:#9ca3af}
+  .pm-name{font-size:13px;font-weight:600;color:#1a1a2e}
+  .pm-bio{font-size:11px;color:#6b7280;line-height:1.5;margin-top:2px}
+  .pm-cta{font-size:11px;margin-top:4px;font-weight:600}
+  .hl-row{display:flex;gap:10px;padding:8px 0 4px;overflow-x:auto;scrollbar-width:none}
+  .hl-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
+  .hl-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;text-align:center;line-height:1.3;font-weight:600}
+  .hl-lbl{font-size:9px;color:#9ca3af}
+  .feed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+  .feed-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:8px;text-align:center;padding:5px;font-weight:600;line-height:1.4}
+
+  /* OPPS */
+  .opp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .opp-card{background:white;border:1px solid #e8e4f8;border-radius:14px;padding:14px}
+  .opp-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:18px}
+  .opp-title{font-size:12px;font-weight:700;color:#1a1a2e;margin-bottom:4px}
+  .opp-text{font-size:11px;color:#6b7280;line-height:1.5}
+
+  /* PROPOSAL */
+  .price-card{background:white;border:2px solid #5b21b6;border-radius:16px;padding:18px;margin-bottom:14px}
+  .price-val{font-size:30px;font-weight:700;color:#1a1a2e}
+  .price-per{font-size:13px;color:#9ca3af}
+  .feat-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+  .feat-dot{width:7px;height:7px;border-radius:50%;background:#5b21b6;flex-shrink:0;margin-top:5px}
+  .feat-text{font-size:13px;color:#374151;line-height:1.5}
+
+  /* CTA BUTTON */
+  .cta-btn{width:100%;padding:14px;border-radius:12px;border:2px solid #5b21b6;background:transparent;color:#5b21b6;font-size:14px;cursor:pointer;margin-top:10px;font-weight:700;transition:all .2s}
+  .cta-btn:hover{background:#5b21b6;color:white}
+  .cta-btn-fill{background:#5b21b6;color:white}
+
+  /* FOOTER NAV */
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e8e4f8;display:flex;justify-content:space-around;padding:10px 0 14px}
+  .bn-btn{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:transparent;color:#9ca3af;font-size:10px;font-weight:500;padding:0 12px}
+  .bn-btn.active{color:#5b21b6}
+  .bn-dot{width:5px;height:5px;border-radius:50%;background:#5b21b6;display:none}
+  .bn-btn.active .bn-dot{display:block}
+  .bn-icon{font-size:20px}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="nav-wrap">
+    <div class="nav-scroll" id="nav">
+      <button class="nav-btn active" onclick="go(0)">Visão geral</button>
+      <button class="nav-btn" onclick="go(1)">Diagnóstico</button>
+      <button class="nav-btn" onclick="go(2)">Multicanal</button>
+      <button class="nav-btn" onclick="go(3)">Jornada</button>
+      <button class="nav-btn" onclick="go(4)">Feed</button>
+      <button class="nav-btn" onclick="go(5)">Oportunidades</button>
+      <button class="nav-btn" onclick="go(6)">Proposta</button>
+    </div>
+  </div>
+
+  <!-- PAGE 0: VISÃO GERAL -->
+  <div id="p0" class="page active">
+    <div class="hero-tag">Análise exclusiva — Martha Losso Logística</div>
+    <h1>Você tem autoridade. Falta transformar isso em clientes.</h1>
+    <p class="sub">Fizemos uma análise completa da sua presença digital antes desta reunião. Veja o que encontramos — e o que é possível construir juntas.</p>
+    <div class="metric-row">
+      <div class="metric"><div class="metric-val">750</div><div class="metric-lbl">Seguidores Instagram</div><span class="metric-trend trend-bad">Potencial de 5k+</span></div>
+      <div class="metric"><div class="metric-val">281</div><div class="metric-lbl">Publicações</div><span class="metric-trend trend-ok">Consistência boa</span></div>
+      <div class="metric"><div class="metric-val">3</div><div class="metric-lbl">Canais ativos</div><span class="metric-trend trend-bad">Sem integração</span></div>
+      <div class="metric"><div class="metric-val">~0</div><div class="metric-lbl">CTAs claros</div><span class="metric-trend trend-bad">Sem funil</span></div>
+    </div>
+    <div class="card card-accent">
+      <h3>O problema central</h3>
+      <p style="font-size:13px;color:#6b7280;line-height:1.7;margin-top:6px">Você produz conteúdo técnico de alto valor — mas o visitante chega no seu perfil, aprende, e vai embora. Não há caminho claro para virar cliente. A Mzen resolve exatamente isso.</p>
+    </div>
+    <div class="card card-purple">
+      <h3>Por que a Mzen?</h3>
+      <p style="font-size:13px;margin-top:6px;line-height:1.7">Somos a única agência com portfólio em comex. Conhecemos drawback, Radar RFB, MAPA e ANVISA. Você não vai precisar explicar o setor para a gente.</p>
+    </div>
+    <button class="cta-btn" onclick="go(1)">Ver diagnóstico completo →</button>
+  </div>
+
+  <!-- PAGE 1: DIAGNÓSTICO -->
+  <div id="p1" class="page">
+    <div class="section-label">Diagnóstico</div>
+    <h2>O que analisamos no seu perfil</h2>
+    <p class="sub">Análise feita antes da reunião, baseada em dados públicos do seu Instagram.</p>
+
+    <div class="card">
+      <h3>Identidade visual</h3>
+      <div class="bar-wrap"><div class="bar-fill" style="width:25%;background:#ef4444"></div></div>
+      <div class="score-row"><span>Crítico</span><span style="font-weight:600;color:#ef4444">25/100</span></div>
+      <p style="font-size:13px;color:#6b7280;margin-top:10px;line-height:1.6">Cada post parece vir de uma marca diferente. Sem paleta definida, sem tipografia consistente, sem grid visual. O visitante não forma memória visual da sua marca — e memória é o que gera confiança.</p>
+      <div style="margin-top:10px"><span class="badge b-warn">Sem paleta</span><span class="badge b-warn">Fontes variadas</span><span class="badge b-red">Sem identidade</span><span class="badge b-red">Feed inconsistente</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Bio e posicionamento</h3>
+      <div class="bar-wrap"><div class="bar-fill" style="width:40%;background:#f59e0b"></div></div>
+      <div class="score-row"><span>Fraco</span><span style="font-weight:600;color:#f59e0b">40/100</span></div>
+      <p style="font-size:13px;color:#6b7280;margin-top:10px;line-height:1.6">A bio informa o que você faz — mas não comunica por que te escolher. Falta uma frase que responda à pergunta do importador: "por que essa despachante e não outra?"</p>
+      <div style="margin-top:10px"><span class="badge b-warn">CTA fraco</span><span class="badge b-info">Serviços listados</span><span class="badge b-warn">Sem diferencial</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Conteúdo e estratégia</h3>
+      <div class="bar-wrap"><div class="bar-fill" style="width:62%;background:#10b981"></div></div>
+      <div class="score-row"><span>Bom</span><span style="font-weight:600;color:#10b981">62/100</span></div>
+      <p style="font-size:13px;color:#6b7280;margin-top:10px;line-height:1.6">Conteúdo técnico de qualidade real. Frequência consistente. Temas altamente relevantes para o nicho. O problema: não há funil. O conteúdo educa perfeitamente, mas não converte.</p>
+      <div style="margin-top:10px"><span class="badge b-ok">Vídeos educativos</span><span class="badge b-ok">Temas nichados</span><span class="badge b-red">Sem funil</span><span class="badge b-red">Sem CTA nos posts</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Destaques (Highlights)</h3>
+      <div class="bar-wrap"><div class="bar-fill" style="width:35%;background:#f59e0b"></div></div>
+      <div class="score-row"><span>Fraco</span><span style="font-weight:600;color:#f59e0b">35/100</span></div>
+      <p style="font-size:13px;color:#6b7280;margin-top:10px;line-height:1.6">Os destaques existem, mas as capas não têm identidade visual. Nomes pouco claros para quem chega pela primeira vez. O visitante não sabe por onde começar.</p>
+      <div style="margin-top:10px"><span class="badge b-warn">Capas sem identidade</span><span class="badge b-warn">Nomes genéricos</span></div>
+    </div>
+
+    <div class="card">
+      <h3>Engajamento vs. seguidores</h3>
+      <div class="bar-wrap"><div class="bar-fill" style="width:55%;background:#7c3aed"></div></div>
+      <div class="score-row"><span>Acima da média</span><span style="font-weight:600;color:#7c3aed">55/100</span></div>
+      <p style="font-size:13px;color:#6b7280;margin-top:10px;line-height:1.6">Taxa de engajamento proporcionalmente boa para 750 seguidores — sinal de que o conteúdo ressoa. Com identidade visual e funil, esse número escala rápido.</p>
+      <div style="margin-top:10px"><span class="badge b-ok">Engajamento real</span><span class="badge b-ok">Audiência qualificada</span></div>
+    </div>
+
+    <button class="cta-btn" onclick="go(2)">Ver análise multicanal →</button>
+  </div>
+
+  <!-- PAGE 2: MULTICANAL -->
+  <div id="p2" class="page">
+    <div class="section-label">Multicanal</div>
+    <h2>Como seus clientes te encontram hoje</h2>
+    <p class="sub">Mapeamos todos os canais onde a Martha Losso tem presença — e os que estão sendo desperdiçados.</p>
+
+    <div class="card">
+      <div class="ch-row">
+        <div class="ch-icon" style="background:#fce7f3;color:#9d174d">Ig</div>
+        <div class="ch-body">
+          <div class="ch-name">Instagram</div>
+          <div class="ch-sub">Canal principal · 750 seguidores · ativo</div>
+          <div class="bar-wrap" style="margin:6px 0 0"><div class="bar-fill" style="width:55%;background:#ec4899"></div></div>
+        </div>
+        <div class="ch-score" style="color:#b45309">55%</div>
+      </div>
+      <div class="ch-row">
+        <div class="ch-icon" style="background:#dbeafe;color:#1e40af">Li</div>
+        <div class="ch-body">
+          <div class="ch-name">LinkedIn</div>
+          <div class="ch-sub">Subutilizado · decisores de comex estão aqui</div>
+          <div class="bar-wrap" style="margin:6px 0 0"><div class="bar-fill" style="width:20%;background:#3b82f6"></div></div>
+        </div>
+        <div class="ch-score" style="color:#991b1b">20%</div>
+      </div>
+      <div class="ch-row">
+        <div class="ch-icon" style="background:#d1fae5;color:#065f46">Yt</div>
+        <div class="ch-body">
+          <div class="ch-name">YouTube</div>
+          <div class="ch-sub">Presente · conteúdo longo · SEO inexplorado</div>
+          <div class="bar-wrap" style="margin:6px 0 0"><div class="bar-fill" style="width:30%;background:#10b981"></div></div>
+        </div>
+        <div class="ch-score" style="color:#b45309">30%</div>
+      </div>
+      <div class="ch-row">
+        <div class="ch-icon" style="background:#fef3c7;color:#92400e">Gg</div>
+        <div class="ch-body">
+          <div class="ch-name">Google / SEO</div>
+          <div class="ch-sub">Sem presença otimizada · oportunidade enorme</div>
+          <div class="bar-wrap" style="margin:6px 0 0"><div class="bar-fill" style="width:10%;background:#f59e0b"></div></div>
+        </div>
+        <div class="ch-score" style="color:#991b1b">10%</div>
+      </div>
+      <div class="ch-row">
+        <div class="ch-icon" style="background:#ede9fe;color:#4c1d95">Wh</div>
+        <div class="ch-body">
+          <div class="ch-name">WhatsApp</div>
+          <div class="ch-sub">Conversão acontece aqui · não está integrado</div>
+          <div class="bar-wrap" style="margin:6px 0 0"><div class="bar-fill" style="width:45%;background:#7c3aed"></div></div>
+        </div>
+        <div class="ch-score" style="color:#b45309">45%</div>
+      </div>
+    </div>
+
+    <div class="card card-accent">
+      <h3>O problema da fragmentação</h3>
+      <p style="font-size:13px;color:#6b7280;line-height:1.7;margin-top:6px">Cada canal funciona de forma isolada. Quem te vê no Instagram não te encontra no Google. Quem pesquisa "despachante aduaneiro vinhos SP" não chega até você. A Mzen conecta todos esses pontos em uma estratégia integrada onde cada canal alimenta o outro.</p>
+    </div>
+
+    <div class="card">
+      <h3>O que a Mzen ativa</h3>
+      <div style="margin-top:8px">
+        <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Instagram com identidade unificada e funil de conversão completo</div></div>
+        <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">LinkedIn ativado para alcançar diretores de importação e tradings</div></div>
+        <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">YouTube reaproveitado como Reels e carrosséis no Instagram</div></div>
+        <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Google Meu Negócio configurado e otimizado para buscas locais</div></div>
+        <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Link na bio com CTA direto para WhatsApp e captura de leads</div></div>
+      </div>
+    </div>
+
+    <button class="cta-btn" onclick="go(3)">Ver jornada do cliente →</button>
+  </div>
+
+  <!-- PAGE 3: JORNADA -->
+  <div id="p3" class="page">
+    <div class="section-label">Jornada do cliente</div>
+    <h2>Como o importador vira seu cliente</h2>
+    <p class="sub">Compare a jornada atual com o que a Mzen constrói.</p>
+
+    <div class="toggle-wrap">
+      <button class="toggle-btn on" id="jbtn-hoje" onclick="toggleJ('hoje')">Hoje</button>
+      <button class="toggle-btn" id="jbtn-mzen" onclick="toggleJ('mzen')">Com a Mzen</button>
+    </div>
+
+    <div id="j-hoje">
+      <div class="step">
+        <div class="step-num" style="background:#fee2e2;color:#991b1b">1</div>
+        <div><div class="step-title">Descobre por indicação</div><div class="step-text">90% dos clientes chegam por indicação. Sem presença digital ativa, não há descoberta orgânica. Você depende da sorte de alguém lembrar do seu nome.</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#fef3c7;color:#92400e">2</div>
+        <div><div class="step-title">Pesquisa no Google</div><div class="step-text">Busca "despachante aduaneiro vinhos SP" ou "como importar vinho Brasil" — você não aparece. O concorrente aparece. O cliente vai para ele.</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#fef3c7;color:#92400e">3</div>
+        <div><div class="step-title">Visita o Instagram</div><div class="step-text">Encontra conteúdo técnico bom, mas visual inconsistente. Bio não comunica diferencial. Não entende qual é o próximo passo.</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#fee2e2;color:#991b1b">4</div>
+        <div><div class="step-title">Vai embora</div><div class="step-text">Sem CTA claro, sem botão de contato óbvio, sem razão para ficar. Abandona o perfil e segue em frente.</div></div>
+      </div>
+      <div class="card" style="background:#fff5f5;border-color:#fca5a5">
+        <h3 style="color:#991b1b">Resultado: 100% dependente de indicação</h3>
+        <p style="font-size:13px;color:#7f1d1d;line-height:1.6;margin-top:6px">Crescimento lento, imprevisível e limitado pela sua rede pessoal. Impossível escalar.</p>
+      </div>
+    </div>
+
+    <div id="j-mzen" style="display:none">
+      <div class="step">
+        <div class="step-num" style="background:#d1fae5;color:#065f46">1</div>
+        <div><div class="step-title">Descobre via Google</div><div class="step-text">Pesquisa "despachante aduaneiro importação vinhos" — você aparece no Google Meu Negócio, no Google Maps e em artigos do blog otimizados para SEO.</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#d1fae5;color:#065f46">2</div>
+        <div><div class="step-title">Chega no Instagram</div><div class="step-text">Perfil com identidade visual forte. Bio com proposta de valor clara: "Importação de vinhos sem complicação." Destaques organizados por tema de interesse.</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#d1fae5;color:#065f46">3</div>
+        <div><div class="step-title">Consome conteúdo e confia</div><div class="step-text">Assiste Reels educativos, lê cases reais ("importei 500 caixas — o que aprendi"), vê depoimentos em destaque. Autoridade comprovada em cada post.</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#ede9fe;color:#4c1d95">4</div>
+        <div><div class="step-title">Clica no CTA</div><div class="step-text">Link na bio leva direto para WhatsApp com mensagem pré-formatada. O importador só precisa apertar um botão. Atrito zero.</div></div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#d1fae5;color:#065f46">5</div>
+        <div><div class="step-title">Vira cliente</div><div class="step-text">Fluxo completo do descoberta ao contato, sem depender de indicação. Acontece mesmo quando você não está postando.</div></div>
+      </div>
+      <div class="card" style="background:#f0fdf9;border-color:#a7f3d0">
+        <h3 style="color:#065f46">Resultado: máquina de aquisição orgânica</h3>
+        <p style="font-size:13px;color:#064e3b;line-height:1.6;margin-top:6px">Novos clientes chegam todos os dias. Crescimento previsível, escalável e independente de indicação.</p>
+      </div>
+    </div>
+
+    <button class="cta-btn" onclick="go(4)">Ver mockup do feed →</button>
+  </div>
+
+  <!-- PAGE 4: FEED -->
+  <div id="p4" class="page">
+    <div class="section-label">Feed</div>
+    <h2>Antes e depois — visual ao vivo</h2>
+    <p class="sub">Toque para comparar o feed atual com o que a Mzen entregaria.</p>
+
+    <div class="toggle-wrap">
+      <button class="toggle-btn on" id="fbtn-antes" onclick="toggleF('antes')">Feed atual</button>
+      <button class="toggle-btn" id="fbtn-depois" onclick="toggleF('depois')">Com a Mzen</button>
+    </div>
+
+    <div id="feed-antes">
+      <div class="profile-mock">
+        <div class="pm-header">
+          <div class="pm-row">
+            <div class="pm-avatar" style="background:#e5e7eb;color:#6b7280">ML</div>
+            <div class="pm-stats">
+              <div class="pm-stat"><div class="pm-sv">281</div><div class="pm-sl">posts</div></div>
+              <div class="pm-stat"><div class="pm-sv">750</div><div class="pm-sl">seguid.</div></div>
+              <div class="pm-stat"><div class="pm-sv">1.419</div><div class="pm-sl">seguindo</div></div>
+            </div>
+          </div>
+          <div class="pm-name">marthalosso.lossologistica</div>
+          <div class="pm-bio">Desembaraço e soluções aduaneiras. Radar RFB. Reg Mapa e Anvisa. Consultoria importação vinhos, azeites, bebidas e...</div>
+          <div class="pm-cta" style="color:#9ca3af">bit.ly/m/lossologistica</div>
+          <div class="hl-row">
+            <div class="hl-item"><div class="hl-circle" style="border:1.5px solid #d1d5db;color:#9ca3af">Memó-rias</div><div class="hl-lbl">Memórias</div></div>
+            <div class="hl-item"><div class="hl-circle" style="border:1.5px solid #d1d5db;color:#9ca3af">Imp. Azeites</div><div class="hl-lbl">Azeites</div></div>
+            <div class="hl-item"><div class="hl-circle" style="border:1.5px solid #d1d5db;color:#9ca3af">MOC</div><div class="hl-lbl">MOC</div></div>
+            <div class="hl-item"><div class="hl-circle" style="border:1.5px solid #d1d5db;color:#9ca3af">Santos</div><div class="hl-lbl">Santos</div></div>
+          </div>
+        </div>
+        <div class="feed-grid">
+          <div class="feed-cell" style="background:#f3f0fb;color:#5b21b6">despachante como posso te ajudar?</div>
+          <div class="feed-cell" style="background:#e0f2fe;color:#0c4a6e">evento equipe fotos</div>
+          <div class="feed-cell" style="background:#fef9ee;color:#78350f">boas festas clientes</div>
+          <div class="feed-cell" style="background:#f0fdf4;color:#14532d">5 dicas rotular vinhos</div>
+          <div class="feed-cell" style="background:#fff7ed;color:#7c2d12">importação série vídeos</div>
+          <div class="feed-cell" style="background:#fdf2f8;color:#831843">feriado aviso</div>
+          <div class="feed-cell" style="background:#eff6ff;color:#1e3a8a">é importador?</div>
+          <div class="feed-cell" style="background:#f0f9ff;color:#0c4a6e">consultoria técnica</div>
+          <div class="feed-cell" style="background:#f7fee7;color:#365314">MAPA registro</div>
+        </div>
+      </div>
+      <div><span class="badge b-red">Visual inconsistente</span><span class="badge b-warn">Sem identidade</span><span class="badge b-red">Sem CTA</span><span class="badge b-warn">Bio genérica</span><span class="badge b-red">Sem funil</span></div>
+    </div>
+
+    <div id="feed-depois" style="display:none">
+      <div class="profile-mock">
+        <div class="pm-header">
+          <div class="pm-row">
+            <div class="pm-avatar" style="background:#5b21b6;color:white">ML</div>
+            <div class="pm-stats">
+              <div class="pm-stat"><div class="pm-sv">281</div><div class="pm-sl">posts</div></div>
+              <div class="pm-stat"><div class="pm-sv">750</div><div class="pm-sl">seguid.</div></div>
+              <div class="pm-stat"><div class="pm-sv">1.419</div><div class="pm-sl">seguindo</div></div>
+            </div>
+          </div>
+          <div class="pm-name" style="font-weight:700">Martha Losso | Despacho Aduaneiro</div>
+          <div class="pm-bio" style="color:#1a1a2e;font-weight:500">Importação de vinhos e bebidas sem complicação.</div>
+          <div class="pm-bio">Radar RFB · MAPA · ANVISA · Santos e SP</div>
+          <div class="pm-cta" style="color:#5b21b6">Fale comigo antes de importar →</div>
+          <div class="hl-row">
+            <div class="hl-item"><div class="hl-circle" style="border:2px solid #5b21b6;color:#5b21b6;font-weight:700">Vinhos</div><div class="hl-lbl">Vinhos</div></div>
+            <div class="hl-item"><div class="hl-circle" style="border:2px solid #5b21b6;color:#5b21b6;font-weight:700">Radar</div><div class="hl-lbl">Radar</div></div>
+            <div class="hl-item"><div class="hl-circle" style="border:2px solid #5b21b6;color:#5b21b6;font-weight:700">Cases</div><div class="hl-lbl">Cases</div></div>
+            <div class="hl-item"><div class="hl-circle" style="border:2px solid #5b21b6;color:#5b21b6;font-weight:700">FAQ</div><div class="hl-lbl">FAQ</div></div>
+            <div class="hl-item"><div class="hl-circle" style="border:2px solid #5b21b6;color:#5b21b6;font-weight:700">Sobre</div><div class="hl-lbl">Sobre</div></div>
+          </div>
+        </div>
+        <div class="feed-grid">
+          <div class="feed-cell" style="background:#1e0b4b;color:#c4b5fd">Erro nº1 na importação de vinhos</div>
+          <div class="feed-cell" style="background:#2d1a6e;color:#ddd6fe">Como habilitar o Radar RFB</div>
+          <div class="feed-cell" style="background:#1e0b4b;color:#c4b5fd">MAPA passo a passo</div>
+          <div class="feed-cell" style="background:#2d1a6e;color:#ddd6fe">Case: importei 500 caixas</div>
+          <div class="feed-cell" style="background:#1e0b4b;color:#c4b5fd">Azeite importado vs nacional</div>
+          <div class="feed-cell" style="background:#2d1a6e;color:#ddd6fe">ANVISA: o que ninguém conta</div>
+          <div class="feed-cell" style="background:#1e0b4b;color:#c4b5fd">3 perguntas antes de importar</div>
+          <div class="feed-cell" style="background:#2d1a6e;color:#ddd6fe">Despacho: mitos e verdades</div>
+          <div class="feed-cell" style="background:#5b21b6;color:white">Fale comigo →</div>
+        </div>
+      </div>
+      <div><span class="badge b-ok">Identidade unificada</span><span class="badge b-ok">Bio com proposta</span><span class="badge b-info">CTA em cada post</span><span class="badge b-ok">Funil integrado</span></div>
+    </div>
+
+    <button class="cta-btn" onclick="go(5)" style="margin-top:16px">Ver oportunidades →</button>
+  </div>
+
+  <!-- PAGE 5: OPORTUNIDADES -->
+  <div id="p5" class="page">
+    <div class="section-label">Oportunidades</div>
+    <h2>O que está sendo deixado na mesa</h2>
+    <p class="sub">6 oportunidades concretas identificadas na análise do seu perfil.</p>
+
+    <div class="opp-grid">
+      <div class="opp-card">
+        <div class="opp-icon" style="background:#ede9fe">🎨</div>
+        <div class="opp-title">Identidade visual</div>
+        <div class="opp-text">Paleta, tipografia e grid unificados. Reconhecimento instantâneo da marca.</div>
+      </div>
+      <div class="opp-card">
+        <div class="opp-icon" style="background:#d1fae5">🔄</div>
+        <div class="opp-title">Funil de conteúdo</div>
+        <div class="opp-text">Topo, meio e fundo. Cada post com objetivo claro de conversão.</div>
+      </div>
+      <div class="opp-card">
+        <div class="opp-icon" style="background:#dbeafe">💼</div>
+        <div class="opp-title">LinkedIn ativo</div>
+        <div class="opp-text">Decisores de comex estão lá. Canal quase virgem para você explorar.</div>
+      </div>
+      <div class="opp-card">
+        <div class="opp-icon" style="background:#fef3c7">👤</div>
+        <div class="opp-title">Personal brand</div>
+        <div class="opp-text">Martha é a marca. Humanizar aumenta confiança e taxa de conversão.</div>
+      </div>
+      <div class="opp-card">
+        <div class="opp-icon" style="background:#fce7f3">🔍</div>
+        <div class="opp-title">SEO e Google</div>
+        <div class="opp-text">Aparecer quando o importador pesquisa. Tráfego gratuito e constante.</div>
+      </div>
+      <div class="opp-card">
+        <div class="opp-icon" style="background:#f0fdf4">▶️</div>
+        <div class="opp-title">YouTube reaproveitado</div>
+        <div class="opp-text">Transformar vídeos longos em Reels e carrosséis automaticamente.</div>
+      </div>
+    </div>
+
+    <div class="card card-accent">
+      <h3>Potencial de crescimento</h3>
+      <p style="font-size:13px;color:#6b7280;line-height:1.7;margin-top:6px">Com estratégia multicanal integrada, perfis de nicho como o seu crescem de 750 para 3.000–5.000 seguidores em 6 meses. Mais importante: seguidores qualificados que viram clientes.</p>
+    </div>
+
+    <button class="cta-btn" onclick="go(6)">Ver proposta →</button>
+  </div>
+
+  <!-- PAGE 6: PROPOSTA -->
+  <div id="p6" class="page">
+    <div class="section-label">Proposta</div>
+    <h2>O que a Mzen entrega para você</h2>
+
+    <div class="price-card">
+      <span style="display:inline-block;font-size:11px;padding:3px 12px;border-radius:20px;background:#ede9fe;color:#4c1d95;margin-bottom:14px;font-weight:700">Fase 1 — Foco e identidade</span>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:18px">
+        <div class="price-val">R$ 2.500</div>
+        <div class="price-per">/mês</div>
+      </div>
+      <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Identidade visual completa — paleta, tipografia, grid do Instagram</div></div>
+      <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">12 posts/mês com copy estratégica e design padronizado</div></div>
+      <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Reels semanais com conteúdo técnico em linguagem acessível</div></div>
+      <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Reestruturação de bio, destaques e link na bio com CTA</div></div>
+      <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Google Meu Negócio configurado e otimizado</div></div>
+      <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Relatório mensal com métricas e próximos passos</div></div>
+      <div class="feat-row"><div class="feat-dot"></div><div class="feat-text">Reunião quinzenal de alinhamento com a equipe</div></div>
+    </div>
+
+    <div class="card">
+      <span style="display:inline-block;font-size:11px;padding:3px 12px;border-radius:20px;background:#f0fdf9;color:#065f46;margin-bottom:12px;font-weight:700">Fase 2 — Expansão (opcional)</span>
+      <div class="feat-row"><div class="feat-dot" style="background:#10b981"></div><div class="feat-text">LinkedIn ativado com estratégia de prospecção B2B</div></div>
+      <div class="feat-row"><div class="feat-dot" style="background:#10b981"></div><div class="feat-text">Assessoria de imprensa com clipping e releases</div></div>
+      <div class="feat-row"><div class="feat-dot" style="background:#10b981"></div><div class="feat-text">E-mail marketing para base de leads qualificados</div></div>
+      <div class="feat-row"><div class="feat-dot" style="background:#10b981"></div><div class="feat-text">Campanha de tráfego pago (Meta Ads)</div></div>
+      <p style="font-size:12px;color:#9ca3af;margin-top:8px">Investimento adicional sob consulta.</p>
+    </div>
+
+    <div class="card">
+      <h3>Clientes Mzen no setor de comex</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+        <span class="badge b-info">Feaduaneiros</span>
+        <span class="badge b-info">Brachmann Logistics</span>
+        <span class="badge b-info">L7 Comex</span>
+        <span class="badge b-info">Schryver Logistics</span>
+        <span class="badge b-info">Wolff Cargo</span>
+      </div>
+      <p style="font-size:13px;color:#6b7280;margin-top:12px;line-height:1.6">Conhecemos o vocabulário e as dores do setor. Você não vai precisar explicar o que é drawback, NCM ou DUIMP para a gente.</p>
+    </div>
+
+    <div class="card" style="background:#5b21b6;border:none;text-align:center;padding:20px">
+      <p style="color:#ddd6fe;font-size:13px;margin-bottom:6px">Próximo passo</p>
+      <p style="color:white;font-size:16px;font-weight:700;line-height:1.5">Proposta formal enviada hoje até as 18h</p>
+      <p style="color:#c4b5fd;font-size:13px;margin-top:8px">Validade: 7 dias úteis</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function go(n){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('p'+n).classList.add('active');
+  document.querySelectorAll('.nav-btn')[n].classList.add('active');
+  window.scrollTo(0,0);
+}
+function toggleJ(v){
+  document.getElementById('j-hoje').style.display=v==='hoje'?'block':'none';
+  document.getElementById('j-mzen').style.display=v==='mzen'?'block':'none';
+  document.getElementById('jbtn-hoje').className='toggle-btn'+(v==='hoje'?' on':'');
+  document.getElementById('jbtn-mzen').className='toggle-btn'+(v==='mzen'?' on':'');
+}
+function toggleF(v){
+  document.getElementById('feed-antes').style.display=v==='antes'?'block':'none';
+  document.getElementById('feed-depois').style.display=v==='depois'?'block':'none';
+  document.getElementById('fbtn-antes').className='toggle-btn'+(v==='antes'?' on':'');
+  document.getElementById('fbtn-depois').className='toggle-btn'+(v==='depois'?' on':'');
+}
+</script>
+</body>
+</html>
